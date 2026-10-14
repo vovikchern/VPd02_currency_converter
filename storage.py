@@ -22,3 +22,12 @@ def is_cache_valid(path="currency_rates.json", max_age_hours=24) -> bool:
 
     file_age = datetime.now().timestamp() - os.path.getmtime(path)
     return file_age < max_age_hours * 3600
+
+
+def get_cached_base_currency(path="currency_rates.json") -> str:
+    """Получает базовую валюту из кэша"""
+    if not os.path.exists(path):
+        return None
+    
+    data = read_from_file(path)
+    return data.get("base_code")

@@ -1,5 +1,5 @@
 from api_client import get_currency_rates, convert_currency
-from storage import save_to_file, read_from_file, is_cache_valid
+from storage import save_to_file, read_from_file, is_cache_valid, get_cached_base_currency
 
 DISPLAY_CURRENCIES = ["USD", "RUB", "EUR", "GBP"]
 
@@ -12,12 +12,20 @@ def validate_currency(currency_code: str, rates: dict) -> bool:
 def main():
     path = "currency_rates.json"
 
+    base_currency = input("Введите базовую валюту (например, USD): ").upper()
+
     if is_cache_valid(path):
-        print("Используем кэш...")
-        data = read_from_file(path)
+        cached_base = get_cached_base_currency(path)
+        if cached_base == base_currency:
+            print("Используем кэш...")
+            data = read_from_file(path)
+        else:
+            print(f"Кэш содержит данные для {cached_base}, обновляем для {base_currency}...")
+            data = get_currency_rates(base_currency)
+            if data:
+                save_to_file(data, path)
     else:
         print("Обновляем данные...")
-        base_currency = input("Введите базовую валюту (например, USD): ").upper()
         data = get_currency_rates(base_currency)
         if data:
             save_to_file(data, path)
